@@ -1,44 +1,75 @@
+# This file is automatically added by @npmcli/template-oss. Do not edit.
+
 name: Publish
 
 on:
   push:
     branches:
       - main
-  pull_request_target:
+  pull_request:
   workflow_dispatch:
   workflow_call:
+
 
 jobs:
   build-and-upload:
     permissions:
       contents: read
       pages: read
+    name: Build and Upload
+    if: github.repository_owner == 'npm'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     steps:
-      - name: Checkout PR
-        if: ${{ github.event_name == 'pull_request_target' }}
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
       - name: Checkout
-        if: ${{ github.event_name != 'pull_request_target' }}
         uses: actions/checkout@v3
+      - name: Setup Git User
+        run: |
+          git config --global user.email "npm-cli+bot@github.com"
+          git config --global user.name "npm CLI robot"
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        id: node
         with:
-          ref: main
+          node-version: 18.x
+          check-latest: contains('18.x', '.x')
+          cache: npm
+      - name: Install Latest npm
+        uses: ./.github/actions/install-latest-npm
+        with:
+          node: ${{ steps.node.outputs.node-version }}
+      - name: Install Dependencies
+        run: npm i --no-audit --no-fund
+      - name: Rebuild deps
+        run: npm rebuild
+
       - name: Setup Pages
         uses: actions/configure-pages@v1
-      - name: Use Node.js
-        uses: actions/setup-node@v3
+
+      - name: Restore cache
+        id: cache-gatsby
+        uses: actions/cache/restore@v3
         with:
-          node-version: 16.x
-          cache: npm
-      - name: Install npm packages
-        run: npm ci
+          key: ${{ runner.os }}-gatsby-${{ github.ref_name }}
+          path: |
+            public
+            .cache
+
       - name: Build documentation
         run: npm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Save cache
+        uses: actions/cache/save@v3
+        with:
+          key: ${{ steps.cache-gatsby.outputs.cache-primary-key }}
+          path: |
+            public
+            .cache
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
@@ -58,4 +89,4 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v1
         with:
-          preview: ${{ github.event_name == 'pull_request_target' }}
+          preview: ${{ github.event_name == 'pull_request' }}

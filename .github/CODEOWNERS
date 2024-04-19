@@ -1,8 +1,21 @@
-# Assign Product Management to all open PRs
-*    @MylesBorins @monishcm
+* @npm/cli-team
 
-# Assign cli team to cli related PRs
-# In general these should be closed and pointed towards the CLI
-# repo... we should automate this
-/cli    @npm/cli-team
-/content/cli    @npm/cli-team
+# Content
+/.github/CODEOWNERS   @MylesBorins @monishcm @lukekarrys
+/content/             @MylesBorins @monishcm @lukekarrys
+/src/                 @MylesBorins @monishcm @lukekarrys
+/static/              @MylesBorins @monishcm @lukekarrys
+/CONTENT-MODEL.md     @MylesBorins @monishcm @lukekarrys
+
+# Policies
+/content/policies/    @MylesBorins
+/CODE_OF_CONDUCT.md   @MylesBorins
+
+# Licensing
+/.reuse/              @MylesBorins @lukekarrys
+/LICENSES/            @MylesBorins
+/LICENSE              @MylesBorins
+/LICENSE-CODE         @MylesBorins
+
+# CLI
+/content/cli/         @npm/cli-team
